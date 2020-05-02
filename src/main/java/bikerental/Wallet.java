@@ -9,6 +9,5 @@ public class Wallet {
     public Wallet(BigDecimal walletSize) {
         this.walletSize = walletSize;
     }
-
 }
 

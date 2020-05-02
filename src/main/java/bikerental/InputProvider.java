@@ -13,4 +13,8 @@ public class InputProvider {
     public String takeStringInput() {
         return scanner.next();
     }
+
+    public long takeLongInput() {
+        return scanner.nextLong();
+    }
 }

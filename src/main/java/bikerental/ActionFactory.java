@@ -5,6 +5,7 @@ public class ActionFactory {
     private final String RENT_ACTION = "1";
     private final String SHOW_RENTED = "2";
     private final String WALLET = "3";
+    private final String EXIT = "4";
     private InputProvider inputProvider;
     private BikeRent bikeRent;
 
@@ -16,7 +17,11 @@ public class ActionFactory {
     public Action getAction(String input) {
         switch (input) {
             case RENT_ACTION:
-                //TODO
+                return new RentBikeAction(inputProvider, bikeRent);
+            case EXIT:
+                System.exit(0);
+            default:
+                return new UnknownAction();
         }
     }
 }
