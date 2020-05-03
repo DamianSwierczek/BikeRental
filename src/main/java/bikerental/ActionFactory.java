@@ -18,6 +18,10 @@ public class ActionFactory {
         switch (input) {
             case RENT_ACTION:
                 return new RentBikeAction(inputProvider, bikeRent);
+            case SHOW_RENTED:
+                return new ShowRentedBikeAction(inputProvider,bikeRent);
+            case WALLET:
+                return new Wallet(inputProvider,bikeRent);
             case EXIT:
                 System.exit(0);
             default:

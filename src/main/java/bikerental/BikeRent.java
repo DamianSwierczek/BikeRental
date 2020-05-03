@@ -1,8 +1,10 @@
 package bikerental;
 
+import java.io.ByteArrayInputStream;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -44,8 +46,10 @@ public class BikeRent {
                 System.out.println("Which bike you want? Choose by number");
                 long bikeOption = inputProvider.takeLongInput();
                 checkBikeToRent(bikeOption);
+                break;
             case "2":
-                // METHOD FOR SORT
+                sortBikesByBrand();
+                break;
             case "3":
                 // METHOD FOR SORT
             case "4":
@@ -84,5 +88,10 @@ public class BikeRent {
             System.out.println("Pick action: \n1 - Rent a Bike \n2 - Show my rented bikes \n3 - My wallet \n4 - Exit");
             performAction(actionFactory.getAction(inputProvider.takeStringInput()));
         }
+    }
+    public void sortBikesByBrand() {
+        System.out.println(bikeTypeList.stream()
+                .sorted(Comparator.comparing(BikeType::getBrand))
+                .collect(Collectors.toList()));
     }
 }

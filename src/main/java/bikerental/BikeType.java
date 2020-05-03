@@ -30,6 +30,14 @@ public class BikeType {
         this.id = id;
     }
 
+    public String getBrand() {
+        return brand;
+    }
+
+    public String getColor() {
+        return color;
+    }
+
     public void setStatus(String status) {
         this.status = status;
     }
