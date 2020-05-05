@@ -30,6 +30,10 @@ public class BikeType {
         this.id = id;
     }
 
+    public BigDecimal getCostPerHour() {
+        return costPerHour;
+    }
+
     public String getBrand() {
         return brand;
     }

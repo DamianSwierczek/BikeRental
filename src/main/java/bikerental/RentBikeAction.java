@@ -1,7 +1,5 @@
 package bikerental;
 
-import java.util.Comparator;
-import java.util.stream.Collectors;
 
 public class RentBikeAction implements Action {
     private InputProvider inputProvider;
@@ -14,7 +12,6 @@ public class RentBikeAction implements Action {
 
     @Override
     public void performAction(){
-        bikeRent.printListOfBikes();
         System.out.println("What is your desire? \n1 - Rent a bike " +
                 "\n2 - Sort by brand " +
                 "\n3 - Sort by price " +

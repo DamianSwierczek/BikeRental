@@ -1,6 +1,5 @@
 package bikerental;
 
-import java.io.ByteArrayInputStream;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -13,6 +12,7 @@ public class BikeRent {
     private InputProvider inputProvider;
     private ActionFactory actionFactory;
     List<BikeType> bikeTypeList = new ArrayList<>();
+    BigDecimal walletSize = new BigDecimal(0);
 
 
     public BikeRent(InputProvider inputProvider) {
@@ -44,6 +44,7 @@ public class BikeRent {
         switch (input) {
             case "1":
                 System.out.println("Which bike you want? Choose by number");
+                printListOfBikes();
                 long bikeOption = inputProvider.takeLongInput();
                 checkBikeToRent(bikeOption);
                 break;
@@ -51,11 +52,14 @@ public class BikeRent {
                 sortBikesByBrand();
                 break;
             case "3":
-                // METHOD FOR SORT
+                sortBikesByCost();
+                break;
             case "4":
-                //METHOD FOR SORT
+                sortBikesByStatus();
+                break;
             case "5":
-                //METHOD FOR SORT
+                sortBikesByColor();
+                break;
         }
     }
 
@@ -89,9 +93,31 @@ public class BikeRent {
             performAction(actionFactory.getAction(inputProvider.takeStringInput()));
         }
     }
+
     public void sortBikesByBrand() {
         System.out.println(bikeTypeList.stream()
                 .sorted(Comparator.comparing(BikeType::getBrand))
                 .collect(Collectors.toList()));
+    }
+
+    public void sortBikesByColor() {
+        System.out.println(bikeTypeList.stream()
+                .sorted(Comparator.comparing(BikeType::getColor))
+                .collect(Collectors.toList()));
+    }
+
+    public void sortBikesByStatus() {
+        System.out.println(bikeTypeList.stream()
+                .sorted(Comparator.comparing(BikeType::getStatus))
+                .collect(Collectors.toList()));
+    }
+
+    public void sortBikesByCost() {
+        System.out.println(bikeTypeList.stream()
+                .sorted(Comparator.comparing(BikeType::getCostPerHour))
+                .collect(Collectors.toList()));
+    }
+    public void addMoneyToWallet(BigDecimal money){
+        walletSize = walletSize.add(money);
     }
 }

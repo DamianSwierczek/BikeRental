@@ -18,6 +18,7 @@ public class ActionFactory {
         switch (input) {
             case RENT_ACTION:
                 return new RentBikeAction(inputProvider, bikeRent);
+
             case SHOW_RENTED:
                 return new ShowRentedBikeAction(inputProvider,bikeRent);
             case WALLET:

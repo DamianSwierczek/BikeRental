@@ -1,5 +1,6 @@
 package bikerental;
 
+import java.math.BigDecimal;
 import java.util.Scanner;
 
 public class InputProvider {
@@ -16,5 +17,9 @@ public class InputProvider {
 
     public long takeLongInput() {
         return scanner.nextLong();
+    }
+
+    public BigDecimal takeBigDecimalInput() {
+        return scanner.nextBigDecimal();
     }
 }
