@@ -1,10 +1,8 @@
 package bikerental;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
+import java.time.LocalDateTime;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class BikeRent {
@@ -23,16 +21,16 @@ public class BikeRent {
 
 
     private void initBikes() {
-        bikeTypeList.add(new BikeType("Kross", "Red", "Free", new BigDecimal(10), 1));
-        bikeTypeList.add(new BikeType("Mark", "Green", "Free", new BigDecimal(13), 2));
-        bikeTypeList.add(new BikeType("Croll", "Blue", "Free", new BigDecimal(15), 3));
-        bikeTypeList.add(new BikeType("Leisch", "Black", "Free", new BigDecimal(15), 4));
-        bikeTypeList.add(new BikeType("Laver", "Red", "Free", new BigDecimal(15), 5));
-        bikeTypeList.add(new BikeType("Ferox", "Green", "Free", new BigDecimal(13), 6));
-        bikeTypeList.add(new BikeType("Kaks", "Blue", "Free", new BigDecimal(10), 7));
-        bikeTypeList.add(new BikeType("Kross", "Black", "Free", new BigDecimal(13), 8));
-        bikeTypeList.add(new BikeType("Leisch", "Red", "Free", new BigDecimal(15), 9));
-        bikeTypeList.add(new BikeType("Laver", "Black", "Free", new BigDecimal(10), 10));
+        bikeTypeList.add(0,new BikeType("Kross", "Red", "Free", new BigDecimal(10), 1));
+        bikeTypeList.add(1,new BikeType("Mark", "Green", "Free", new BigDecimal(13), 2));
+        bikeTypeList.add(2,new BikeType("Croll", "Blue", "Free", new BigDecimal(15), 3));
+        bikeTypeList.add(3,new BikeType("Leisch", "Black", "Free", new BigDecimal(15), 4));
+        bikeTypeList.add(4,new BikeType("Laver", "Red", "Free", new BigDecimal(15), 5));
+        bikeTypeList.add(5,new BikeType("Ferox", "Green", "Free", new BigDecimal(13), 6));
+        bikeTypeList.add(6,new BikeType("Kaks", "Blue", "Free", new BigDecimal(10), 7));
+        bikeTypeList.add(7,new BikeType("Kross", "Black", "Free", new BigDecimal(13), 8));
+        bikeTypeList.add(8,new BikeType("Leisch", "Red", "Free", new BigDecimal(15), 9));
+        bikeTypeList.add(9,new BikeType("Laver", "Black", "Free", new BigDecimal(10), 10));
     }
 
     public void printListOfBikes() {
@@ -45,7 +43,7 @@ public class BikeRent {
             case "1":
                 System.out.println("Which bike you want? Choose by number");
                 printListOfBikes();
-                long bikeOption = inputProvider.takeLongInput();
+                int bikeOption = inputProvider.takeIntInput();
                 checkBikeToRent(bikeOption);
                 break;
             case "2":
@@ -67,12 +65,18 @@ public class BikeRent {
         action.performAction();
     }
 
-    private void checkBikeToRent(long bikeOption) {
+    private void checkBikeToRent(int bikeOption) {
         checkIfBikeIsFree(bikeOption);
         setBikeStatusToRented(bikeOption);
+        startCostPerHour(bikeOption)
     }
 
-    private boolean checkIfBikeIsFree(long bikeId) {
+    private void startCostPerHour(int bikeOption) {
+      //TODO
+
+    }
+
+    private boolean checkIfBikeIsFree(int bikeId) {
 
         return bikeTypeList.stream()
                 .filter(bike -> bike.getId() == bikeId)
@@ -80,7 +84,7 @@ public class BikeRent {
 
     }
 
-    private void setBikeStatusToRented(long bikeId) {
+    private void setBikeStatusToRented(int bikeId) {
         bikeTypeList.stream()
                 .filter(bike -> bike.getId() == bikeId)
                 .peek(bike -> bike.setStatus("Rented"))
@@ -119,5 +123,17 @@ public class BikeRent {
     }
     public void addMoneyToWallet(BigDecimal money){
         walletSize = walletSize.add(money);
+    }
+
+    public void endReservationOnBike(int bikeId){
+        if(bikeTypeList.get(bikeId - 1).getStatus().equals("Rented")) {
+            bikeTypeList.stream()
+                    .filter(bike -> bike.getId() == bikeId)
+                    .peek(bike -> bike.setStatus("Free"))
+                    .collect(Collectors.toList());
+            System.out.println("Reservation of bike number " + bikeId + " has ended. You've paid xxx $, thank you!");
+        } else {
+            System.out.println("There's no rented bike with that number");
+        }
     }
 }

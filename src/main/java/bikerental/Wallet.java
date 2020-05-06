@@ -1,7 +1,5 @@
 package bikerental;
 
-import java.math.BigDecimal;
-
 public class Wallet implements Action {
 
     private InputProvider inputProvider;

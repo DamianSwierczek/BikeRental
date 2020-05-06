@@ -15,8 +15,8 @@ public class InputProvider {
         return scanner.next();
     }
 
-    public long takeLongInput() {
-        return scanner.nextLong();
+    public int takeIntInput() {
+        return scanner.nextInt();
     }
 
     public BigDecimal takeBigDecimalInput() {

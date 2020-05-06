@@ -7,9 +7,9 @@ public class BikeType {
     private final String color;
     private String status;
     private final BigDecimal costPerHour;
-    private final long id;
+    private final int id;
 
-    public long getId() {
+    public int getId() {
         return id;
     }
 
@@ -22,7 +22,7 @@ public class BikeType {
                 "Cost per hour: " + costPerHour + "| ";
     }
 
-    public BikeType(String brand, String color, String status, BigDecimal costPerHour, long id) {
+    public BikeType(String brand, String color, String status, BigDecimal costPerHour, int id) {
         this.brand = brand;
         this.color = color;
         this.status = status;
