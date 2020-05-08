@@ -1,7 +1,8 @@
 package bikerental;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -11,6 +12,7 @@ public class BikeRent {
     private ActionFactory actionFactory;
     List<BikeType> bikeTypeList = new ArrayList<>();
     BigDecimal walletSize = new BigDecimal(0);
+    List<BikeRentInformation> rentedBikeList = new ArrayList<>();
 
 
     public BikeRent(InputProvider inputProvider) {
@@ -66,22 +68,24 @@ public class BikeRent {
     }
 
     private void checkBikeToRent(int bikeOption) {
-        checkIfBikeIsFree(bikeOption);
-        setBikeStatusToRented(bikeOption);
-        startCostPerHour(bikeOption)
+        if(checkIfBikeIsFree(bikeOption)) {
+            setBikeStatusToRented(bikeOption);
+            startCostPerHour(bikeOption);
+        } else {
+            System.out.println("Selected bike is not free");
+        }
     }
 
-    private void startCostPerHour(int bikeOption) {
-      //TODO
-
+    private void startCostPerHour(int bikeId) {
+        LocalTime time = LocalTime.now();
+        rentedBikeList.add(new BikeRentInformation(bikeTypeList.get(bikeId - 1).getCostPerHour(),bikeId, time));
+        System.out.println((Arrays.toString(rentedBikeList.toArray())));
     }
 
     private boolean checkIfBikeIsFree(int bikeId) {
-
         return bikeTypeList.stream()
                 .filter(bike -> bike.getId() == bikeId)
-                .collect(Collectors.toList()).get(0).getStatus().equals("Free");
-
+                .anyMatch(bike -> bike.getStatus().equals("Free"));
     }
 
     private void setBikeStatusToRented(int bikeId) {
@@ -131,9 +135,19 @@ public class BikeRent {
                     .filter(bike -> bike.getId() == bikeId)
                     .peek(bike -> bike.setStatus("Free"))
                     .collect(Collectors.toList());
-            System.out.println("Reservation of bike number " + bikeId + " has ended. You've paid xxx $, thank you!");
+            System.out.println("Reservation of bike number " + bikeId + " has ended.");
+            endReservationPay(bikeId, LocalTime.now());
         } else {
             System.out.println("There's no rented bike with that number");
         }
+    }
+    public void endReservationPay(int bikeId, LocalTime bikeEndReservation) {
+        BigDecimal minutes = new BigDecimal(ChronoUnit.MINUTES.between(rentedBikeList.get(bikeId - 1).getRentTime(), bikeEndReservation));
+        BigDecimal cost = new BigDecimal(bikeTypeList.get(bikeId - 1).getCostPerHour().intValueExact());
+        cost = cost.multiply(minutes);
+        cost = cost.add(bikeTypeList.get(bikeId - 1).getCostPerHour());
+        System.out.println("You've paid " + cost + "$. Thank you!");
+        rentedBikeList.remove(bikeId - 1);
+        walletSize = walletSize.subtract(cost);
     }
 }

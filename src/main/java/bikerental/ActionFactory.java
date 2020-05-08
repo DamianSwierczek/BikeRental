@@ -20,11 +20,15 @@ public class ActionFactory {
                 return new RentBikeAction(inputProvider, bikeRent);
 
             case SHOW_RENTED:
-                return new ShowRentedBikeAction(inputProvider,bikeRent);
+                return new ShowRentedBikeAction(inputProvider, bikeRent);
             case WALLET:
-                return new Wallet(inputProvider,bikeRent);
+                return new Wallet(inputProvider, bikeRent);
             case EXIT:
-                System.exit(0);
+                if (bikeRent.walletSize.intValueExact() >= 0) {
+                    System.exit(0);
+                } else {
+                    System.out.println("You have to add money to your wallet!");
+                }
             default:
                 return new UnknownAction();
         }
