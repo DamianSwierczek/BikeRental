@@ -79,7 +79,7 @@ public class BikeRent {
     private void startCostPerHour(int bikeId) {
         LocalTime time = LocalTime.now();
         rentedBikeList.add(new BikeRentInformation(bikeTypeList.get(bikeId - 1).getCostPerHour(),bikeId, time));
-        System.out.println((Arrays.toString(rentedBikeList.toArray())));
+       // System.out.println((Arrays.toString(rentedBikeList.toArray()))); - JUST FOR TEST
     }
 
     private boolean checkIfBikeIsFree(int bikeId) {
@@ -147,7 +147,6 @@ public class BikeRent {
         cost = cost.multiply(minutes);
         cost = cost.add(bikeTypeList.get(bikeId - 1).getCostPerHour());
         System.out.println("You've paid " + cost + "$. Thank you!");
-        rentedBikeList.remove(bikeId - 1);
         walletSize = walletSize.subtract(cost);
     }
 }
