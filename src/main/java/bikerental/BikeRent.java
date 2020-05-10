@@ -71,8 +71,9 @@ public class BikeRent {
         if(checkIfBikeIsFree(bikeOption)) {
             setBikeStatusToRented(bikeOption);
             startCostPerHour(bikeOption);
+            System.out.println("Bike number " + bikeOption + " is rented. Thank you!");
         } else {
-            System.out.println("Selected bike is not free");
+            System.out.println("Selected bike is not free or don't exist");
         }
     }
 
@@ -125,8 +126,8 @@ public class BikeRent {
                 .sorted(Comparator.comparing(BikeType::getCostPerHour))
                 .collect(Collectors.toList()));
     }
-    public void addMoneyToWallet(BigDecimal money){
-        walletSize = walletSize.add(money);
+    public void addMoneyToWallet(BigDecimal money) {
+            walletSize = walletSize.add(money);
     }
 
     public void endReservationOnBike(int bikeId){

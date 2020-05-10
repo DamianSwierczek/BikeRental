@@ -1,5 +1,7 @@
 package bikerental;
 
+import java.util.InputMismatchException;
+
 public class Wallet implements Action {
 
     private InputProvider inputProvider;
@@ -16,7 +18,12 @@ public class Wallet implements Action {
         System.out.println("Your cash: " + bikeRent.walletSize + "\n Choose option: \n 1 - Add cash\n Any other - Go back to main menu");
         if (inputProvider.takeStringInput().equals("1")) {
             System.out.println("How much money you want to have?");
-            bikeRent.addMoneyToWallet(inputProvider.takeBigDecimalInput());
+            try {
+                bikeRent.addMoneyToWallet(inputProvider.takeBigDecimalInput());
+            } catch (InputMismatchException e) {
+            System.out.println("Wrong input, try again");
+            return;
+        }
         }
     }
 }
