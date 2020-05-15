@@ -12,7 +12,7 @@ public class BikeRent {
     private ActionFactory actionFactory;
     List<BikeType> bikeTypeList = new ArrayList<>();
     BigDecimal walletSize = new BigDecimal(0);
-    List<BikeRentInformation> rentedBikeList = new ArrayList<>();
+    private List<BikeRentInformation> rentedBikeList = new ArrayList<>();
 
 
     public BikeRent(InputProvider inputProvider) {
