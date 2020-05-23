@@ -1,5 +1,8 @@
 package bikerental;
 
+import com.mongodb.*;
+
+import javax.swing.text.Document;
 import java.math.BigDecimal;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
@@ -14,13 +17,19 @@ public class BikeRent {
     BigDecimal walletSize = new BigDecimal(0);
     private List<BikeRentInformation> rentedBikeList = new ArrayList<>();
 
+    ////////////////////////////////// DATABASE VARIABLES ////////////////////////////
+    String uri = "mongodb+srv://Admin:admin@bikes-mdly2.azure.mongodb.net/test\n";
+    MongoClientURI clientUri = new MongoClientURI(uri);
+    MongoClient mongoClient = new MongoClient(clientUri);
+    DB database = mongoClient.getDB("BikeRent");
+    DBCollection collection = database.getCollection("Bikes");
+    ////////////////////////////////////////////////////////////////////////////////
 
     public BikeRent(InputProvider inputProvider) {
         this.inputProvider = inputProvider;
         this.actionFactory = new ActionFactory(inputProvider, this);
         initBikes();
     }
-
 
     private void initBikes() {
         bikeTypeList.add(0,new BikeType("Kross", "Red", "Free", new BigDecimal(10), 1));
@@ -80,13 +89,23 @@ public class BikeRent {
     private void startCostPerHour(int bikeId) {
         LocalTime time = LocalTime.now();
         rentedBikeList.add(new BikeRentInformation(bikeTypeList.get(bikeId - 1).getCostPerHour(),bikeId, time));
-       // System.out.println((Arrays.toString(rentedBikeList.toArray()))); - JUST FOR TEST
     }
 
     private boolean checkIfBikeIsFree(int bikeId) {
-        return bikeTypeList.stream()
+
+       BasicDBObject searchForDocument = new BasicDBObject();
+        searchForDocument.put("_id", bikeId);
+        DBCursor cursor = collection.find(searchForDocument);
+        while(cursor.hasNext()) {
+            System.out.println(cursor.next());
+        }
+
+
+       return bikeTypeList.stream()
                 .filter(bike -> bike.getId() == bikeId)
                 .anyMatch(bike -> bike.getStatus().equals("Free"));
+
+
     }
 
     private void setBikeStatusToRented(int bikeId) {
