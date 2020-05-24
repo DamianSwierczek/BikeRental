@@ -1,13 +1,21 @@
 package bikerental;
 
 import com.mongodb.*;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
+import org.bson.Document;
 
-import javax.swing.text.Document;
+import static com.mongodb.client.model.Projections.*;
+import static com.mongodb.client.model.Updates.*;
+import static com.mongodb.client.model.Filters.*;
+
+
 import java.math.BigDecimal;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
+
 
 public class BikeRent {
 
@@ -21,8 +29,8 @@ public class BikeRent {
     String uri = "mongodb+srv://Admin:admin@bikes-mdly2.azure.mongodb.net/test\n";
     MongoClientURI clientUri = new MongoClientURI(uri);
     MongoClient mongoClient = new MongoClient(clientUri);
-    DB database = mongoClient.getDB("BikeRent");
-    DBCollection collection = database.getCollection("Bikes");
+    MongoDatabase database = mongoClient.getDatabase("BikeRent");
+    MongoCollection collection = database.getCollection("Bikes");
     ////////////////////////////////////////////////////////////////////////////////
 
     public BikeRent(InputProvider inputProvider) {
@@ -32,16 +40,16 @@ public class BikeRent {
     }
 
     private void initBikes() {
-        bikeTypeList.add(0,new BikeType("Kross", "Red", "Free", new BigDecimal(10), 1));
-        bikeTypeList.add(1,new BikeType("Mark", "Green", "Free", new BigDecimal(13), 2));
-        bikeTypeList.add(2,new BikeType("Croll", "Blue", "Free", new BigDecimal(15), 3));
-        bikeTypeList.add(3,new BikeType("Leisch", "Black", "Free", new BigDecimal(15), 4));
-        bikeTypeList.add(4,new BikeType("Laver", "Red", "Free", new BigDecimal(15), 5));
-        bikeTypeList.add(5,new BikeType("Ferox", "Green", "Free", new BigDecimal(13), 6));
-        bikeTypeList.add(6,new BikeType("Kaks", "Blue", "Free", new BigDecimal(10), 7));
-        bikeTypeList.add(7,new BikeType("Kross", "Black", "Free", new BigDecimal(13), 8));
-        bikeTypeList.add(8,new BikeType("Leisch", "Red", "Free", new BigDecimal(15), 9));
-        bikeTypeList.add(9,new BikeType("Laver", "Black", "Free", new BigDecimal(10), 10));
+        bikeTypeList.add(0, new BikeType("Kross", "Red", "Free", new BigDecimal(10), 1));
+        bikeTypeList.add(1, new BikeType("Mark", "Green", "Free", new BigDecimal(13), 2));
+        bikeTypeList.add(2, new BikeType("Croll", "Blue", "Free", new BigDecimal(15), 3));
+        bikeTypeList.add(3, new BikeType("Leisch", "Black", "Free", new BigDecimal(15), 4));
+        bikeTypeList.add(4, new BikeType("Laver", "Red", "Free", new BigDecimal(15), 5));
+        bikeTypeList.add(5, new BikeType("Ferox", "Green", "Free", new BigDecimal(13), 6));
+        bikeTypeList.add(6, new BikeType("Kaks", "Blue", "Free", new BigDecimal(10), 7));
+        bikeTypeList.add(7, new BikeType("Kross", "Black", "Free", new BigDecimal(13), 8));
+        bikeTypeList.add(8, new BikeType("Leisch", "Red", "Free", new BigDecimal(15), 9));
+        bikeTypeList.add(9, new BikeType("Laver", "Black", "Free", new BigDecimal(10), 10));
     }
 
     public void printListOfBikes() {
@@ -77,7 +85,7 @@ public class BikeRent {
     }
 
     private void checkBikeToRent(int bikeOption) {
-        if(checkIfBikeIsFree(bikeOption)) {
+        if (checkIfBikeIsFree(bikeOption)) {
             setBikeStatusToRented(bikeOption);
             startCostPerHour(bikeOption);
             System.out.println("Bike number " + bikeOption + " is rented. Thank you!");
@@ -88,31 +96,35 @@ public class BikeRent {
 
     private void startCostPerHour(int bikeId) {
         LocalTime time = LocalTime.now();
-        rentedBikeList.add(new BikeRentInformation(bikeTypeList.get(bikeId - 1).getCostPerHour(),bikeId, time));
+        rentedBikeList.add(new BikeRentInformation(bikeTypeList.get(bikeId - 1).getCostPerHour(), bikeId, time));
     }
 
     private boolean checkIfBikeIsFree(int bikeId) {
 
-       BasicDBObject searchForDocument = new BasicDBObject();
-        searchForDocument.put("_id", bikeId);
-        DBCursor cursor = collection.find(searchForDocument);
-        while(cursor.hasNext()) {
-            System.out.println(cursor.next());
-        }
+        Document document = (Document) collection
+                .find(new BasicDBObject("_id", bikeId))
+                .projection(fields(include("status"), excludeId())).first();
 
+        String status = document.getString("status");
 
-       return bikeTypeList.stream()
+        return status.equals("Free");
+
+       /* return bikeTypeList.stream()
                 .filter(bike -> bike.getId() == bikeId)
                 .anyMatch(bike -> bike.getStatus().equals("Free"));
 
-
+        */
     }
 
     private void setBikeStatusToRented(int bikeId) {
+        collection.updateOne(eq("_id", bikeId), combine(set("status", "Rented")));
+        /*
         bikeTypeList.stream()
                 .filter(bike -> bike.getId() == bikeId)
                 .peek(bike -> bike.setStatus("Rented"))
                 .collect(Collectors.toList());
+
+         */
     }
 
     public void run() {
@@ -145,12 +157,13 @@ public class BikeRent {
                 .sorted(Comparator.comparing(BikeType::getCostPerHour))
                 .collect(Collectors.toList()));
     }
+
     public void addMoneyToWallet(BigDecimal money) {
-            walletSize = walletSize.add(money);
+        walletSize = walletSize.add(money);
     }
 
-    public void endReservationOnBike(int bikeId){
-        if(bikeTypeList.get(bikeId - 1).getStatus().equals("Rented")) {
+    public void endReservationOnBike(int bikeId) {
+        if (bikeTypeList.get(bikeId - 1).getStatus().equals("Rented")) {
             bikeTypeList.stream()
                     .filter(bike -> bike.getId() == bikeId)
                     .peek(bike -> bike.setStatus("Free"))
@@ -161,6 +174,7 @@ public class BikeRent {
             System.out.println("There's no rented bike with that number");
         }
     }
+
     public void endReservationPay(int bikeId, LocalTime bikeEndReservation) {
         BigDecimal minutes = new BigDecimal(ChronoUnit.MINUTES.between(rentedBikeList.get(bikeId - 1).getRentTime(), bikeEndReservation));
         BigDecimal cost = new BigDecimal(bikeTypeList.get(bikeId - 1).getCostPerHour().intValueExact());

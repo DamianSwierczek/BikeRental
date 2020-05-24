@@ -8,9 +8,6 @@ public class Main {
         InputProvider inputProvider = new InputProvider(new Scanner(System.in));
         BikeRent bikeRent = new BikeRent(inputProvider);
         bikeRent.run();
-
-
-
     }
 
 
