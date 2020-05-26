@@ -1,15 +1,14 @@
 package bikerental;
 
-import java.math.BigDecimal;
 import java.time.LocalTime;
 
 public class BikeRentInformation {
 
-    private final BigDecimal costPerHour;
+    private final int costPerHour;
     private final int id;
     private LocalTime rentTime;
 
-    public BikeRentInformation(BigDecimal costPerHour, int id, LocalTime rentTime) {
+    public BikeRentInformation(int costPerHour, int id, LocalTime rentTime) {
         this.costPerHour = costPerHour;
         this.id = id;
         this.rentTime = rentTime;
