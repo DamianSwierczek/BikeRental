@@ -5,8 +5,6 @@ import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCursor;
 import org.bson.Document;
 
-import java.util.stream.Collectors;
-
 public class ShowRentedBikeAction implements Action {
     InputProvider inputProvider;
     BikeRent bikeRent;
@@ -22,15 +20,15 @@ public class ShowRentedBikeAction implements Action {
         MongoCursor<Document> iterator = cursor.iterator();
         while (iterator.hasNext()) {
             System.out.println(iterator.next());
+        }
             System.out.println("Choose action: \n1 - End your reservation \nAny other - Go back to main menu");
             if (inputProvider.takeStringInput().equals("1")) {
                 System.out.println("Choose number of bike which reservation you want to end");
                 try {
                     bikeRent.endReservationOnBike(inputProvider.takeIntInput());
-                } catch (IndexOutOfBoundsException e) {
+                } catch (NullPointerException e) {
                     System.out.println("Wrong bike number");
                 }
             }
         }
     }
-}

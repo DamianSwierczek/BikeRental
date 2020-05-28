@@ -11,9 +11,8 @@ import static com.mongodb.client.model.Projections.*;
 import static com.mongodb.client.model.Updates.*;
 import static com.mongodb.client.model.Filters.*;
 
-
 import java.math.BigDecimal;
-import java.time.LocalTime;
+import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 
@@ -22,9 +21,7 @@ public class BikeRent {
 
     private InputProvider inputProvider;
     private ActionFactory actionFactory;
-    List<BikeType> bikeTypeList = new ArrayList<>();
     BigDecimal walletSize = new BigDecimal(0);
-    private List<BikeRentInformation> rentedBikeList = new ArrayList<>();
 
     ////////////////////////////////// DATABASE VARIABLES ////////////////////////////
     String uri = "mongodb+srv://Admin:admin@bikes-mdly2.azure.mongodb.net/test\n";
@@ -32,26 +29,13 @@ public class BikeRent {
     MongoClient mongoClient = new MongoClient(clientUri);
     MongoDatabase database = mongoClient.getDatabase("BikeRent");
     MongoCollection collection = database.getCollection("Bikes");
+    MongoCollection rentTimeCollection = database.getCollection("RentTime");
     ////////////////////////////////////////////////////////////////////////////////
 
     public BikeRent(InputProvider inputProvider) {
         this.inputProvider = inputProvider;
         this.actionFactory = new ActionFactory(inputProvider, this);
-//        initBikes();
     }
-
-//    private void initBikes() {
-//        bikeTypeList.add(0, new BikeType("Kross", "Red", "Free", new BigDecimal(10), 1));
-//        bikeTypeList.add(1, new BikeType("Mark", "Green", "Free", new BigDecimal(13), 2));
-//        bikeTypeList.add(2, new BikeType("Croll", "Blue", "Free", new BigDecimal(15), 3));
-//        bikeTypeList.add(3, new BikeType("Leisch", "Black", "Free", new BigDecimal(15), 4));
-//        bikeTypeList.add(4, new BikeType("Laver", "Red", "Free", new BigDecimal(15), 5));
-//        bikeTypeList.add(5, new BikeType("Ferox", "Green", "Free", new BigDecimal(13), 6));
-//        bikeTypeList.add(6, new BikeType("Kaks", "Blue", "Free", new BigDecimal(10), 7));
-//        bikeTypeList.add(7, new BikeType("Kross", "Black", "Free", new BigDecimal(13), 8));
-//        bikeTypeList.add(8, new BikeType("Leisch", "Red", "Free", new BigDecimal(15), 9));
-//        bikeTypeList.add(9, new BikeType("Laver", "Black", "Free", new BigDecimal(10), 10));
-//    }
 
     public void printListOfBikes() {
         FindIterable<Document> cursor = collection.find().sort(new BasicDBObject("_id", 1));
@@ -105,26 +89,29 @@ public class BikeRent {
                 .projection(fields(include("costPerHour"), excludeId())).first();
         int costPerHour = document.getInteger("costPerHour");
 
-        LocalTime time = LocalTime.now();
-        rentedBikeList.add(new BikeRentInformation(costPerHour, bikeId, time));
+        Document rentTime = new Document("rentTime", new Date())
+                .append("_id", bikeId)
+                .append("costPerHour", costPerHour);
+        rentTimeCollection.insertOne(rentTime);
     }
 
     private boolean checkIfBikeIsFree(int bikeId) {
+        try {
+            Document document = (Document) collection
+                    .find(new BasicDBObject("_id", bikeId))
+                    .projection(fields(include("status"), excludeId())).first();
+            String status = document.getString("status");
+            return status.equals("Free");
+        } catch (NullPointerException e) {
+            return false;
+        }
 
-        Document document = (Document) collection
-                .find(new BasicDBObject("_id", bikeId))
-                .projection(fields(include("status"), excludeId())).first();
-
-        String status = document.getString("status");
-
-        return status.equals("Free");
-
+    }
        /* return bikeTypeList.stream()
                 .filter(bike -> bike.getId() == bikeId)
                 .anyMatch(bike -> bike.getStatus().equals("Free"));
 
         */
-    }
 
     private void setBikeStatusToRented(int bikeId) {
         collection.updateOne(eq("_id", bikeId), combine(set("status", "Rented")));
@@ -208,22 +195,29 @@ public class BikeRent {
         if (status.equals("Rented")) {
             collection.updateOne(eq("_id", bikeId), combine(set("status", "Free")));
             System.out.println("Reservation of bike number " + bikeId + " has ended.");
-            endReservationPay(bikeId, LocalTime.now());
+            endReservationPay(bikeId);
         } else {
             System.out.println("There's no rented bike with that number");
         }
     }
 
-    public void endReservationPay(int bikeId, LocalTime bikeEndReservation) {
+    public void endReservationPay(int bikeId) {
 
         Document document = (Document) collection
                 .find(new BasicDBObject("_id", bikeId))
                 .projection(fields(include("costPerHour"), excludeId())).first();
 
+        Document rentTime = (Document) rentTimeCollection
+                .find(new BasicDBObject("_id", bikeId))
+                .projection(fields(include("rentTime"), excludeId())).first();
+
+        Date finishRent = rentTime.getDate("rentTime");
         int costPerHour = document.getInteger("costPerHour");
-        long minutes = ChronoUnit.MINUTES.between(rentedBikeList.get(bikeId - 1).getRentTime(), bikeEndReservation);
+
+        long minutes = ChronoUnit.MINUTES.between(finishRent.toInstant(), Instant.now());
         BigDecimal actualCost = new BigDecimal(costPerHour * minutes + costPerHour);
         System.out.println("You've paid " + actualCost + "$. Thank you!");
         walletSize = walletSize.subtract(actualCost);
+        rentTimeCollection.deleteOne(eq("_id", bikeId));
     }
 }
